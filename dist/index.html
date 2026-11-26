@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#4A90E2" />
+    <meta name="description" content="数学笔记应用 - 支持PDF/图片/文本编辑，大存储" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>数学笔记</title>
+    <script type="module" crossorigin src="./assets/index-CxxQ67V3.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BgkrgB0J.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

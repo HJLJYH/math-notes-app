@@ -1,0 +1,162 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #213547;
+  background-color: #f5f5f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* 分类标签样式 */
+.category-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  margin: 4px;
+  background: #4A90E2;
+  color: white;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.category-tag:hover {
+  background: #357ABD;
+  transform: translateY(-1px);
+}
+
+.category-tag.active {
+  background: #2E5D8E;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+}
+
+/* 笔记卡片样式 */
+.note-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.note-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+/* 编辑器样式 */
+.editor {
+  width: 100%;
+  min-height: 300px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.editor:focus {
+  outline: none;
+  border-color: #4A90E2;
+}
+
+/* 按钮样式 */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #4A90E2;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #357ABD;
+}
+
+.btn-danger {
+  background: #E74C3C;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #C0392B;
+}
+
+/* 文件上传区域 */
+.file-upload {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-upload:hover {
+  border-color: #4A90E2;
+  background: #f8f9fa;
+}
+
+/* 表格样式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+tr:hover {
+  background: #f8f9fa;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+  
+  .note-card {
+    margin: 4px;
+    padding: 12px;
+  }
+}

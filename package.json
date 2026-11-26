@@ -1,0 +1,28 @@
+{
+  "name": "math-note-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "数学笔记应用 - 支持PDF/图片/文本编辑",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "android": "cap sync android && cap open android",
+    "ios": "cap sync ios && cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.6.1",
+    "@capacitor/android": "^5.6.1",
+    "@capacitor/filesystem": "^5.0.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "idb": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
+  }
+}

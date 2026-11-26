@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MathNotes</string>
+    <string name="title_activity_main">MathNotes</string>
+    <string name="package_name">com.mathnotes.app</string>
+    <string name="custom_url_scheme">com.mathnotes.app</string>
+</resources>
