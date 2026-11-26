@@ -91,6 +91,7 @@ function App() {
             onChange={handleCategoryChange}
           />
           <NoteList 
+            categories={CATEGORIES}
             db={db}
             category={category}
             onSelect={handleNoteSelect}

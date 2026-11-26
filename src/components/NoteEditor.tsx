@@ -22,7 +22,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
 }) => {
   const [title, setTitle] = useState(note.title || '')
   const [content, setContent] = useState(note.content || '')
-  const [category, setCategory] = useState(note.category || '')
+  const [category, setCategory] = useState(note.category || categories[0])
   const [files, setFiles] = useState<FileRecord[]>([])
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
         ...note,
         title,
         content,
-        category: category || note.category
+        category: category || note.category || categories[0]
       })
     }
   }
