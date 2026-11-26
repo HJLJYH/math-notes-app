@@ -22,15 +22,19 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Setup Android
-        uses: actions/setup-android@v3
-      
-      - name: Install SDK components
+      - name: Install Android SDK
         run: |
+          sudo apt-get update && sudo apt-get install -y openjdk-17-jdk wget unzip
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
-          sdkmanager --version || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" 2>&1 | tail -5
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd /tmp
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O ct.zip
+          unzip -q ct.zip -d /tmp/ct
+          mv /tmp/cmdline-tools /tmp/ct/cmdline-tools
+          mv /tmp/ct/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          echo $ANDROID_HOME/cmdline-tools/latest/bin >> $GITHUB_PATH
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
       
       - name: Install npm deps
         run: cd note-app && npm ci
