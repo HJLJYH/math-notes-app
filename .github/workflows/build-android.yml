@@ -5,69 +5,49 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin'
-          cache: 'gradle'
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      - name: Install Android SDK
-        run: |
-          sudo apt-get update && sudo apt-get install -y openjdk-17-jdk wget unzip
-          
-          export ANDROID_HOME=$HOME/android-sdk
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          
-          # 下载命令行工具
-          cd /tmp
-          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" -O ct.zip
-          
-          # 解压到 $ANDROID_HOME/cmdline-tools/
-          unzip -qo ct.zip -d $ANDROID_HOME/cmdline-tools/
-          
-          # 检查目录结构
-          ls -la $ANDROID_HOME/cmdline-tools/
-          
-          # Google 的 zip 解压后是 $ANDROID_HOME/cmdline-tools/cmdline-tools/
-          # 需要重命名为 latest
-          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
-            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          fi
-          
-          # 添加到 PATH
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          
-          # 同意许可协议
-          yes | sdkmanager --licenses || true
-          
-          # 安装 SDK 组件
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools" 2>&1 | tail -10
-      
-      - name: Install npm deps
-        run: cd note-app && npm ci
-      
+          distribution: temurin
+          cache: gradle
+
+      # GitHub's Ubuntu runners already provide the Android SDK and sdkmanager.
+      - name: Install required Android SDK packages
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+
       - name: Sync Capacitor
-        run: cd note-app && npx cap sync android
-      
+        run: npx --no-install cap sync android
+
       - name: Build APK
-        working-directory: note-app/android
+        working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug 2>&1 | tail -50
-      
+          ./gradlew assembleDebug --no-daemon --stacktrace --console=plain
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: note-app/android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

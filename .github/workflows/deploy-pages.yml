@@ -25,16 +25,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
       - name: Build project
         run: |
-          cd note-app
           npm ci
           npm run build
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'note-app/dist'
+          path: 'dist'
       
       - name: Deploy to GitHub Pages
         id: deployment
