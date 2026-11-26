@@ -26,15 +26,28 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y openjdk-17-jdk wget unzip
           export ANDROID_HOME=$HOME/android-sdk
+          
+          # 下载命令行工具
           mkdir -p $ANDROID_HOME/cmdline-tools
           cd /tmp
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O ct.zip
-          unzip -q ct.zip -d /tmp/ct
-          mv /tmp/cmdline-tools /tmp/ct/cmdline-tools
-          mv /tmp/ct/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" -O ct.zip || exit 1
+          
+          # 解压并移动
+          unzip -qo ct.zip -d $ANDROID_HOME/cmdline-tools
+          ls -la $ANDROID_HOME/cmdline-tools/
+          
+          # 重命名目录
+          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          fi
+          
           echo $ANDROID_HOME/cmdline-tools/latest/bin >> $GITHUB_PATH
+          
+          # 同意许可协议
           yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+          
+          # 安装 SDK 组件
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools" 2>&1 | tail -10
       
       - name: Install npm deps
         run: cd note-app && npm ci
