@@ -25,23 +25,28 @@ jobs:
       - name: Install Android SDK
         run: |
           sudo apt-get update && sudo apt-get install -y openjdk-17-jdk wget unzip
+          
           export ANDROID_HOME=$HOME/android-sdk
+          mkdir -p $ANDROID_HOME/cmdline-tools
           
           # 下载命令行工具
-          mkdir -p $ANDROID_HOME/cmdline-tools
           cd /tmp
-          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" -O ct.zip || exit 1
+          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" -O ct.zip
           
-          # 解压并移动
-          unzip -qo ct.zip -d $ANDROID_HOME/cmdline-tools
+          # 解压到 $ANDROID_HOME/cmdline-tools/
+          unzip -qo ct.zip -d $ANDROID_HOME/cmdline-tools/
+          
+          # 检查目录结构
           ls -la $ANDROID_HOME/cmdline-tools/
           
-          # 重命名目录
+          # Google 的 zip 解压后是 $ANDROID_HOME/cmdline-tools/cmdline-tools/
+          # 需要重命名为 latest
           if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
             mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           fi
           
-          echo $ANDROID_HOME/cmdline-tools/latest/bin >> $GITHUB_PATH
+          # 添加到 PATH
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
           
           # 同意许可协议
           yes | sdkmanager --licenses || true
