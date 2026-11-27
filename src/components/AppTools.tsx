@@ -12,6 +12,7 @@ export default function AppTools({ db, onRestore }: { db: Database | null; onRes
     try { await action() } catch (e) { setStatus(e instanceof Error ? e.message : '操作失败，请重试') } finally { setBusy(false) }
   }
   return <section style={{ padding: 12, background: '#eef5ff', marginBottom: 16 }}>
+    <p>这是独立的“数学笔记稳定版”，可与旧版同时安装。旧版笔记不会自动迁入；请保留旧版继续查看旧资料，不要卸载或清除数据。旧版若没有备份功能，不能用本页直接导出旧版私有数据。</p>
     <button className="btn" disabled={busy} onClick={() => run(async () => {
       setUpdate(null)
       const result = await checkUpdate()

@@ -74,7 +74,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "android-${ANDROID_VERSION_CODE}" release-output/* --target "$GITHUB_SHA" --title "数学笔记 1.1.0 (build ${ANDROID_VERSION_CODE})" --notes "附件持久化、图片与文本预览、原生导出、本地备份和应用内检查APK更新。下载后需系统确认安装，不是热更新。旧版随机debug签名可能不兼容，请勿在未备份前卸载旧版。仅发布应用构建，不包含任何用户笔记或附件。"
+          gh release create "android-${ANDROID_VERSION_CODE}" release-output/* --target "$GITHUB_SHA" --title "数学笔记稳定版 1.1.0 (build ${ANDROID_VERSION_CODE})" --notes "Package: com.mathnotes.stable。独立稳定版，可与旧版同时安装，旧版数据不会自动迁移。不要卸载或清除旧版；旧版若无备份功能，请保留旧版继续查阅资料。附件持久化、图片与文本预览、原生导出、本地备份和应用内检查APK更新。下载后需系统确认安装，不是热更新。未来稳定版使用同一包名与持久签名覆盖升级。仅发布应用构建，不包含任何用户笔记或附件。"
       - name: Remove temporary signing key
         if: always()
         run: rm -f "$ANDROID_KEYSTORE_PATH"

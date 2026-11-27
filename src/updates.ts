@@ -2,11 +2,13 @@ import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
 import { Browser } from '@capacitor/browser'
 
+export const STABLE_PACKAGE = 'com.mathnotes.stable'
 export const RELEASE_API = 'https://api.github.com/repos/HJLJYH/math-notes-app/releases/latest'
 export const RELEASE_PAGE = 'https://github.com/HJLJYH/math-notes-app/releases/latest'
 export interface Update { versionCode: number; version: string; url: string; sha256: string }
 export function parseRelease(raw: any): Update {
   if (!raw || raw.draft || raw.prerelease || typeof raw.tag_name !== 'string' || !/^android-\d+$/.test(raw.tag_name) || !Array.isArray(raw.assets)) throw new Error('发布信息格式不受支持')
+  if (typeof raw.body !== 'string' || !raw.body.includes(`Package: ${STABLE_PACKAGE}`)) throw new Error('发布未声明稳定版包名，已停止更新')
   const code = Number(raw.tag_name.slice(8))
   if (!Number.isSafeInteger(code) || code < 1) throw new Error('发布版本号无效')
   const asset = raw.assets.find((a: any) => a?.name === 'math-notes.apk')

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">MathNotes</string>
-    <string name="title_activity_main">MathNotes</string>
-    <string name="package_name">com.mathnotes.app</string>
-    <string name="custom_url_scheme">com.mathnotes.app</string>
+    <string name="app_name">数学笔记稳定版</string>
+    <string name="title_activity_main">数学笔记稳定版</string>
+    <string name="package_name">com.mathnotes.stable</string>
+    <string name="custom_url_scheme">com.mathnotes.stable</string>
 </resources>

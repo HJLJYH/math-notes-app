@@ -5,7 +5,7 @@ vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform: () => true } 
 vi.mock('@capacitor/app', () => ({ App: { getInfo: async () => ({ build: '1001' }) } }))
 vi.mock('@capacitor/browser', () => ({ Browser: { open: mocks.open } }))
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks() })
-const release = () => ({ tag_name: 'android-1002', name: '测试版本', assets: [{ name: 'math-notes.apk', browser_download_url: 'https://github.com/HJLJYH/math-notes-app/releases/download/android-1002/math-notes.apk', digest: `sha256:${'a'.repeat(64)}` }] })
+const release = () => ({ tag_name: 'android-1002', name: '测试版本', body: 'Package: com.mathnotes.stable', assets: [{ name: 'math-notes.apk', browser_download_url: 'https://github.com/HJLJYH/math-notes-app/releases/download/android-1002/math-notes.apk', digest: `sha256:${'a'.repeat(64)}` }] })
 describe('APK update trust boundary', () => {
   it('accepts only release assets from the fixed repository with a valid GitHub SHA256', () => {
     expect(parseRelease(release())).toMatchObject({ versionCode: 1002, sha256: 'a'.repeat(64) })
@@ -15,6 +15,7 @@ describe('APK update trust boundary', () => {
     raw.assets[0].digest = ''
     expect(() => parseRelease(raw)).toThrow('SHA-256')
     expect(() => parseRelease({ ...release(), prerelease: true })).toThrow()
+    expect(() => parseRelease({ ...release(), body: 'Package: com.mathnotes.app' })).toThrow('稳定版包名')
   })
   it('compares the installed native build and never opens anything during check', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => release() }))

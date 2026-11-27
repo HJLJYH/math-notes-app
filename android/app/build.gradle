@@ -4,7 +4,8 @@ android {
     namespace = "com.mathnotes.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.mathnotes.app"
+        // Stable signing starts a parallel app; never replace/uninstall legacy data.
+        applicationId "com.mathnotes.stable"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '3')
