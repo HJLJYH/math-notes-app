@@ -6,13 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   bundledWebRuntime: false,
   android: {
-    allowMixedContent: true,
-    cleartextTraffic: true
-  },
-  plugins: {
-    Filesystem: {
-      readOnly: false
-    }
+    allowMixedContent: false
   }
 };
 

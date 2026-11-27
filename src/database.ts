@@ -37,16 +37,21 @@ export interface FileRecord {
 
 class Database {
   private static instance: Database | null = null;
+  private static initializing: Promise<Database> | null = null;
   private db: IDBPDatabase<NoteDBSchema> | null = null;
 
   private constructor() {}
 
   static async getInstance(): Promise<Database> {
     if (Database.instance) return Database.instance;
-    
-    Database.instance = new Database();
-    await Database.instance.init();
-    return Database.instance;
+    if (!Database.initializing) {
+      const database = new Database();
+      Database.initializing = database.init().then(() => {
+        Database.instance = database;
+        return database;
+      }).finally(() => { Database.initializing = null; });
+    }
+    return Database.initializing;
   }
 
   private async init() {
@@ -62,18 +67,13 @@ class Database {
     });
   }
 
-  async saveNote(note: Note): Promise<void> {
+  async saveNote(note: Note): Promise<Note> {
     if (!this.db) throw new Error('Database not initialized');
-    
-    const now = Date.now();
-    if (note.id) {
-      note.updated = now;
-      await this.db.put('notes', note);
-    } else {
-      note.created = now;
-      note.updated = now;
-      await this.db.add('notes', note);
-    }
+    const saved = { ...note, created: note.created || Date.now(), updated: Date.now() };
+    const tx = this.db.transaction('notes', 'readwrite');
+    saved.id = await tx.store.put(saved);
+    await tx.done;
+    return saved;
   }
 
   async deleteNote(id: number): Promise<void> {
@@ -106,15 +106,16 @@ class Database {
   async saveFile(noteId: number, file: File): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
     
-    const data = await file.arrayBuffer();
-    const blob = new Blob([data], { type: file.type });
-    
-    await this.db.add('files', {
-      noteId,
-      name: file.name,
-      type: file.type,
-      data: blob
+    // Store the Blob directly: avoid duplicating large attachments in memory.
+    const tx = this.db.transaction(['notes', 'files'], 'readwrite');
+    if (!await tx.objectStore('notes').get(noteId)) {
+      await tx.done;
+      throw new Error('笔记不存在，请先保存笔记');
+    }
+    await tx.objectStore('files').add({
+      noteId, name: file.name, type: file.type, data: file.slice(0, file.size, file.type)
     });
+    await tx.done;
   }
 
   async getFiles(noteId: number): Promise<FileRecord[]> {
@@ -125,6 +126,22 @@ class Database {
   async getFile(id: number): Promise<FileRecord | undefined> {
     if (!this.db) throw new Error('Database not initialized');
     return this.db.get('files', id);
+  }
+
+  async restoreBackup(notes: Note[], files: FileRecord[]): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+    // Merge using new IDs, never overwrite existing notes. Atomic rollback on failure.
+    const tx = this.db.transaction(['notes', 'files'], 'readwrite');
+    const ids = new Map<number, number>();
+    for (const note of notes) {
+      const { id, ...value } = note;
+      ids.set(id!, await tx.objectStore('notes').add(value));
+    }
+    for (const file of files) {
+      const { id: _id, ...value } = file;
+      await tx.objectStore('files').add({ ...value, noteId: ids.get(file.noteId)! });
+    }
+    await tx.done;
   }
 
   async deleteFile(id: number): Promise<void> {

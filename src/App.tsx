@@ -3,6 +3,8 @@ import { Database } from './database'
 import NoteEditor from './components/NoteEditor'
 import NoteList from './components/NoteList'
 import Categories from './components/Categories'
+import AppTools from './components/AppTools'
+import { clearExportCache } from './fileTransfer'
 
 const CATEGORIES = [
   '分析',
@@ -20,13 +22,16 @@ function App() {
   const [db, setDb] = useState<Database | null>(null)
   const [category, setCategory] = useState<string>('全部')
   const [editingNote, setEditingNote] = useState<any>(null)
+  const [revision, setRevision] = useState(0)
+  const [initError, setInitError] = useState('')
 
   useEffect(() => {
     const init = async () => {
       const database = await Database.getInstance()
       setDb(database)
     }
-    init()
+    init().catch(e => setInitError(`本地数据库打开失败：${e.message}。请勿清除数据或卸载。`))
+    void clearExportCache()
   }, [])
 
   const handleCategoryChange = (cat: string) => {
@@ -69,10 +74,12 @@ function App() {
       }}>
         <h1 style={{ margin: 0, fontSize: '24px' }}>数学笔记</h1>
         <p style={{ margin: '8px 0 0', opacity: 0.9, fontSize: '14px' }}>
-          支持PDF/图片/文本编辑 | 大存储
+          离线数学笔记 | 图片与文本预览 | 本机附件
         </p>
       </header>
 
+      {initError && <p role="alert">{initError}</p>}
+      {!editingNote && <AppTools db={db} onRestore={() => setRevision(r => r + 1)} />}
       {editingNote ? (
         <NoteEditor
           note={editingNote}
@@ -90,7 +97,8 @@ function App() {
             current={category}
             onChange={handleCategoryChange}
           />
-          <NoteList 
+          <NoteList
+            key={revision}
             categories={CATEGORIES}
             db={db}
             category={category}

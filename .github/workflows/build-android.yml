@@ -3,55 +3,78 @@ name: Build APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, fix/android-ci]
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android-signing.jks
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: temurin
           cache: gradle
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
-
+      - name: Restore persistent signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64" && test -n "$ANDROID_KEYSTORE_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          chmod 600 "$ANDROID_KEYSTORE_PATH"
+          echo "ANDROID_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
       - name: Install npm dependencies
         run: npm ci
-
-      - name: Test note creation and persistence
+      - name: Test persistence, attachments and update validation
         run: npm test
-
       - name: Build web assets
         run: npm run build
-
       - name: Sync Capacitor
         run: npx --no-install cap sync android
-
-      - name: Build APK
+      - name: Build signed release APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace --console=plain
-
+          ./gradlew assembleRelease --no-daemon --stacktrace --console=plain
+      - name: Verify signature and prepare release
+        run: |
+          mkdir -p release-output
+          cp android/app/build/outputs/apk/release/app-release.apk release-output/math-notes.apk
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose --print-certs release-output/math-notes.apk
+          cd release-output
+          sha256sum math-notes.apk > math-notes.apk.sha256
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: math-notes-signed
+          path: release-output/*
           if-no-files-found: error
+      - name: Publish user-confirmed APK update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "android-${ANDROID_VERSION_CODE}" release-output/* --target "$GITHUB_SHA" --title "数学笔记 1.1.0 (build ${ANDROID_VERSION_CODE})" --notes "附件持久化、图片与文本预览、原生导出、本地备份和应用内检查APK更新。下载后需系统确认安装，不是热更新。旧版随机debug签名可能不兼容，请勿在未备份前卸载旧版。仅发布应用构建，不包含任何用户笔记或附件。"
+      - name: Remove temporary signing key
+        if: always()
+        run: rm -f "$ANDROID_KEYSTORE_PATH"

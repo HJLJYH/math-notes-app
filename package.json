@@ -4,6 +4,7 @@
   "private": true,
   "description": "数学笔记应用 - 支持PDF/图片/文本编辑",
   "scripts": {
+    "postinstall": "node scripts/patch-share.cjs",
     "dev": "vite",
     "build": "tsc && vite build",
     "test": "vitest run --environment jsdom",
@@ -13,8 +14,11 @@
   },
   "dependencies": {
     "@capacitor/android": "^5.6.1",
+    "@capacitor/app": "^5.0.8",
+    "@capacitor/browser": "^5.2.1",
     "@capacitor/core": "^5.6.1",
     "@capacitor/filesystem": "^5.0.7",
+    "@capacitor/share": "^5.0.8",
     "idb": "^7.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
